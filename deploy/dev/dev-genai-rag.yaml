@@ -36,9 +36,9 @@ spec:
     spec:
       project: '{{ .values.environment }}-{{ .values.team }}'
       source:
-        repoURL: athargotest.azurecr.io/helm/fm-services
+        repoURL: athargotest.azurecr.io/helm
         targetRevision: "{{ .values.targetRevision }}"
-        chart: "nexla-services"
+        chart: "fm-services"
         helm:
           version: v3
           releaseName: '{{ .values.environment }}-{{ .values.team }}-{{ .values.deploymentName }}'
