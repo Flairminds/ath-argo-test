@@ -12,7 +12,7 @@ spec:
     directory:
       recurse: true
     path: deploy/dev
-    repoURL: git@github.com:Flairminds/ath-argo-test.git
+    repoURL: https://github.com/Flairminds/ath-argo-test.git
     targetRevision: HEAD
   syncPolicy:
     automated:
