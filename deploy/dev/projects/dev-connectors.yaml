@@ -11,7 +11,7 @@ spec:
   destinations:
   - name: "*"
     server: "*"
-    namespace: 'nexla'
+    namespace: '*'
   clusterResourceWhitelist:
   - group: '*'
     kind: '*'
