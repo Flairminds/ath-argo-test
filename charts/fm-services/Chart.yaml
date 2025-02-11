@@ -1,32 +1,32 @@
 apiVersion: v2
-name: nexla-services
-description: A Helm chart for Nexla services
+name: fm-services
+description: A Helm chart for fm services
 
 type: application
 
 version: "0.1.0-0"          # The version of the chart
 appVersion: "0.1.0"       # The version of the application enclosed by the chart
 
-home: "https://github.com/nexla/gitops-infra-apps/charts/nexla-services"
+home: "https://github.com/Flairminds/ath-argo-test/charts/fm-services"
 
 sources:
-  - "https://github.com/nexla/gitops-infra-apps/charts/nexla-services"
+  - "https://github.com/Flairminds/ath-argo-test/charts/fm-services"
 
 keywords:
-  - nexla
+  - fm
   - services
 
 maintainers:
   - name: DevOps Team
-    email: devops@nexla.com
+    email: devops@fm.com
 
 annotations:
   category: Application
   access: Private
-  nexla.com/license: "Proprietary"
-  nexla.com/support: "support@nexla.com"
-  nexla.com/owner: "Nexla"
-  nexla.com/team: "DevOps"
+  fm.com/license: "Proprietary"
+  fm.com/support: "support@fm.com"
+  fm.com/owner: "fm"
+  fm.com/team: "DevOps"
 
 dependencies:
   # TODO: Copy dep chart locally or use something better. [ TBD ]
@@ -39,8 +39,3 @@ dependencies:
     version: "40.1.0-5"
     repository: "oci://ghcr.io/luminartech/helm-charts-public"
     condition: prometheus-service-discovery.enabled
-
-  # - name: "nexla-commons"
-  #   version: "0.1.0"
-  #   repository: "oci://ghcr.io/nexla/helm-charts"
-  #   condition: "nexla-commons.enabled"

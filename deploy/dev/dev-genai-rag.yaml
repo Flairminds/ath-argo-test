@@ -36,7 +36,7 @@ spec:
     spec:
       project: '{{ .values.environment }}-{{ .values.team }}'
       source:
-        repoURL: ghcr.io/nexla/gitops-infra-apps
+        repoURL: athargotest.azurecr.io/helm/fm-services
         targetRevision: "{{ .values.targetRevision }}"
         chart: "nexla-services"
         helm:
