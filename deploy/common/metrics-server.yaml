@@ -1,0 +1,69 @@
+# ---
+# apiVersion: argoproj.io/v1alpha1
+# kind: ApplicationSet
+# metadata:
+#   name: metrics-server
+#   namespace: argocd
+# spec:
+#   goTemplate: true
+#   generators:
+#     - list:
+#         elements:
+#           - cluster: "in-cluster"  # Replace with your EKS cluster identifier if deploying to a different cluster
+#             url: "https://kubernetes.default.svc"
+#             values:
+#               deploymentName: "metrics-server"
+#               team: "infra"
+#               namespace: "kube-system"
+#               targetRevision: "3.12.2"
+#               replicaCount: 1
+#               resources:
+#                 limits:
+#                   cpu: "100m"
+#                   memory: "200Mi"
+#                 requests:
+#                   cpu: "100m"
+#                   memory: "200Mi"
+#               args:
+#                 - --cert-dir=/tmp
+#                 - --secure-port=4443
+#                 - --kubelet-preferred-address-types=InternalIP,Hostname,InternalDNS,ExternalDNS,ExternalIP
+#                 - --kubelet-use-node-status-port
+#                 - --metric-resolution=15s
+#   template:
+#     metadata:
+#       name: '{{ .values.team }}-{{ .values.deploymentName }}'
+#     spec:
+#       project: '{{ .values.team }}'
+#       source:
+#         repoURL: https://kubernetes-sigs.github.io/metrics-server/
+#         targetRevision: "{{ .values.targetRevision }}"
+#         chart: "metrics-server"
+#         helm:
+#           releaseName: "{{ .values.deploymentName }}"
+#           values: |
+#             replicaCount: {{ .values.replicaCount }}
+#             resources:
+#               limits:
+#                 cpu: "{{ .values.resources.limits.cpu }}"
+#                 memory: "{{ .values.resources.limits.memory }}"
+#               requests:
+#                 cpu: "{{ .values.resources.requests.cpu }}"
+#                 memory: "{{ .values.resources.requests.memory }}"
+#             args:
+#               {{- range .values.args }}
+#               - "{{ . }}"
+#               {{- end }}
+#       destination:
+#         server: '{{ .url }}'
+#         namespace: '{{ .values.namespace }}'
+#       syncPolicy:
+#         automated:
+#           prune: true
+#           selfHeal: true
+#         syncOptions:
+#           - CreateNamespace=true
+#           - ServerSideApply=true
+#       ignoreDifferences: []
+#   syncPolicy:
+#     preserveResourcesOnDeletion: false

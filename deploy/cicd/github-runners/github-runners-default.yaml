@@ -1,0 +1,178 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: github-runners
+  namespace: argocd
+spec:
+  goTemplate: true
+  generators:
+    - list:
+        elements:
+          - cluster: "in-cluster" # Replace with your EKS cluster identifier if deploying to a different cluster
+            url: "https://kubernetes.default.svc"
+            values:
+              deploymentName: "github-runners-default"
+              team: "cicd"
+              namespace: "github-runners"
+              targetRevision: "0.10.1"
+              resources:
+                limits:
+                  cpu: "500m"
+                  memory: "512Mi"
+                requests:
+                  cpu: "250m"
+                  memory: "256Mi"
+              githubConfigUrl: https://github.com/nexla
+              githubConfigSecret: github-nexla-cicd-app-secret
+              githubArcNamespace: github-runners
+              githubArcControllerName: github-arc-controller
+              minRunners: 1
+              maxRunners: 5
+              runnerGroup: "nexla-cicd-runners"
+              runnerScaleSetName: "nexla-cicd-runners"
+  template:
+    metadata:
+      name: '{{ .values.team }}-{{ .values.deploymentName }}'
+    spec:
+      project: '{{ .values.team }}'
+      source:
+        repoURL: "ghcr.io/actions/actions-runner-controller-charts"
+        targetRevision: "{{ .values.targetRevision }}"
+        chart: "gha-runner-scale-set"
+        helm:
+          releaseName: "{{ .values.deploymentName }}"
+          values: |
+            runnerScaleSetName: {{ .values.runnerScaleSetName }}
+            githubConfigUrl: {{ .values.githubConfigUrl }}
+            githubConfigSecret: {{ .values.githubConfigSecret }}
+            minRunners: {{ .values.minRunners }}
+            maxRunners: {{ .values.maxRunners }}
+            runnerGroup: "{{ .values.runnerGroup }}"
+            controllerServiceAccount:
+              namespace: "{{ .values.githubArcNamespace }}"
+              name: "{{ .values.githubArcControllerName }}"
+            template:
+              spec:
+                initContainers:
+                  - name: fix-permissions
+                    image: busybox
+                    command: ["sh", "-c", "chown -R 1001:1001 /home/runner/_work"]
+                    volumeMounts:
+                      - name: work
+                        mountPath: /home/runner/_work
+                    securityContext:
+                      runAsUser: 0
+                  - name: init-dind-externals
+                    image: ghcr.io/actions/actions-runner:latest
+                    command: ["cp", "-r", "-v", "/home/runner/externals/.", "/home/runner/tmpDir/"]
+                    volumeMounts:
+                      - name: dind-externals
+                        mountPath: /home/runner/tmpDir
+                  - name: dind-rootless-init-container
+                    image: docker:dind-rootless
+                    command:
+                      - sh
+                      - -c
+                      - |
+                        set -x
+                        cp -a /etc/. /dind-etc/
+                        echo 'runner:x:1001:1001:runner:/home/runner:/bin/ash' >> /dind-etc/passwd
+                        echo 'runner:x:1001:' >> /dind-etc/group
+                        echo 'runner:100000:65536' >> /dind-etc/subgid
+                        echo 'runner:100000:65536' >>  /dind-etc/subuid
+                        chmod 755 /dind-etc;
+                        chmod u=rwx,g=rx+s,o=rx /dind-home
+                        chown 1001:1001 /dind-home
+                    securityContext:
+                      runAsUser: 0
+                    volumeMounts:
+                      - mountPath: /dind-etc
+                        name: dind-etc
+                      - mountPath: /dind-home
+                        name: dind-home          
+                containers:
+                  - name: runner
+                    image: ghcr.io/actions/actions-runner:latest
+                    command: ["/home/runner/run.sh"]
+                    env:
+                      - name: DOCKER_HOST
+                        value: unix:///run/docker/docker.sock
+                    securityContext:
+                      runAsUser: 1001
+                      runAsGroup: 1001
+                    volumeMounts:
+                      - name: work
+                        mountPath: /home/runner/_work
+                      - name: dind-sock
+                        mountPath: /run/docker
+                        readOnly: true
+                  - name: dind
+                    image: docker:dind-rootless
+                    args:
+                      - dockerd
+                      - --host=unix:///run/docker/docker.sock
+                    securityContext:
+                      # This is required to run the docker daemon and could be a security risk
+                      privileged: true
+                      runAsUser: 1001
+                      runAsGroup: 1001        
+                    volumeMounts:
+                      - name: work
+                        mountPath: /home/runner/_work
+                      - name: dind-sock
+                        mountPath: /run/docker          
+                      - name: dind-externals
+                        mountPath: /home/runner/externals
+                      - name: dind-etc
+                        mountPath: /etc
+                      - name: dind-home
+                        mountPath: /home/runner
+                volumes:
+                  - name: work
+                    ephemeral:
+                      volumeClaimTemplate:
+                        spec:
+                          accessModes: [ "ReadWriteOnce" ]
+                          storageClassName: "gp2"
+                          resources:
+                            requests:
+                              storage: 20Gi
+                  - name: dind-externals
+                    emptyDir: {}
+                  - name: dind-sock
+                    emptyDir: {}
+                  - name: dind-etc
+                    emptyDir: {}
+                  - name: dind-home
+                    emptyDir: {}
+                  # imagePullSecrets:
+                  # - name: regcred
+                tolerations:
+                  - effect: NoSchedule
+                    key: jenkins
+                    operator: Equal
+                    value: "true"
+                  - effect: NoExecute
+                    key: jenkins
+                    operator: Equal
+                    value: "true"
+      destination:
+        server: '{{ .url }}'
+        namespace: '{{ .values.namespace }}'
+      syncPolicy:
+        automated:
+          prune: false
+          selfHeal: false
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+      ignoreDifferences: []
+  syncPolicy:
+    preserveResourcesOnDeletion: false
+
+# kubectl create secret generic github-nexla-cicd-app-secret \
+#   --namespace=github-runners \
+#   --from-literal=github_app_id=1115985 \
+#   --from-literal=github_app_installation_id=60239303 \
+#   --from-literal=github_app_private_key='-----BEGIN CERTIFICATE-----*******'

@@ -1,0 +1,178 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: dev-sinks
+  namespace: argocd
+spec:
+  goTemplate: true
+  generators:
+  - list:
+      elements:
+      #####################
+      ### SINKS SMALL
+      #####################
+      - cluster: "in-cluster" # replcae this in-cluster target to EKS cluster to allow the use of cluster metadata
+        url: "https://kubernetes.default.svc"
+        values:
+          deploymentName: "sinks"
+          team: "connectors"
+          environment: "dev"
+          namespace: "nexla"
+          targetRevision: "0.1.0-0"
+          image: 433433586750.dkr.ecr.us-east-1.amazonaws.com/kafka-connect-jdbc-sink:3.1.0-SNAPSHOT_release-v3.1.0_33_b4af613eca
+          minReplicas: "1"
+          maxReplicas: "2"
+          resources:
+            limits:
+              memory: 8Gi
+              cpu: 3
+            requests:
+              memory: 8Gi
+              cpu: 2
+          sinkSize: "s" # s, m, l, xl
+          KAFKA_HEAP_OPTS: "-Xmx7g -Xms7g -XX:+HeapDumpOnOutOfMemoryError -XX:+PrintFlagsFinal -XX:+UseG1GC -XX:MaxGCPauseMillis=500 -XX:+DisableExplicitGC -XX:+UseStringDeduplication"
+      # #####################
+      # ### SINKS MEDIUM
+      # #####################
+      # - cluster: "in-cluster" # replcae this in-cluster target to EKS cluster to allow the use of cluster metadata
+      #   url: "https://kubernetes.default.svc"
+      #   values:
+      #     deploymentName: "sinks"
+      #     team: "connectors"
+      #     environment: "dev"
+      #     namespace: "nexla"
+      #     targetRevision: "0.1.0-0"
+      #     image: 433433586750.dkr.ecr.us-east-1.amazonaws.com/kafka-connect-jdbc-sink:3.1.0-SNAPSHOT_release-v3.1.0_33_b4af613eca
+      #     minReplicas: "1"
+      #     maxReplicas: "10"
+      #     resources:
+      #       limits:
+      #         memory: 16Gi
+      #         cpu: 4
+      #       requests:
+      #         memory: 15Gi
+      #         cpu: 3
+      #     sinkSize: "m" # s, m, l, xl
+      #     KAFKA_HEAP_OPTS: -Xmx15g -Xms15g -XX:+HeapDumpOnOutOfMemoryError -XX:+PrintFlagsFinal -XX:+UseG1GC -XX:MaxGCPauseMillis=500 -XX:+DisableExplicitGC -XX:+UseStringDeduplication
+      # #####################
+      # ### SINKS LARGE
+      # #####################
+      # - cluster: "in-cluster" # replcae this in-cluster target to EKS cluster to allow the use of cluster metadata
+      #   url: "https://kubernetes.default.svc"
+      #   values:
+      #     deploymentName: "sinks"
+      #     team: "connectors"
+      #     environment: "dev"
+      #     namespace: "nexla"
+      #     targetRevision: "0.1.0-0"
+      #     image: 433433586750.dkr.ecr.us-east-1.amazonaws.com/kafka-connect-jdbc-sink:3.1.0-SNAPSHOT_release-v3.1.0_33_b4af613eca
+      #     minReplicas: "1"
+      #     maxReplicas: "10"
+      #     resources:
+      #       limits:
+      #         memory: 36Gi
+      #         cpu: 6
+      #       requests:
+      #         memory: 32Gi
+      #         cpu: 4
+      #     sinkSize: "l" # s, m, l, xl
+      #     KAFKA_HEAP_OPTS: -Xmx30g -Xms30g -XX:+HeapDumpOnOutOfMemoryError -XX:+PrintFlagsFinal -XX:+UseG1GC -XX:MaxGCPauseMillis=500 -XX:+DisableExplicitGC -XX:+UseStringDeduplication
+      # #####################
+      # ### SINKS EXTRA LARGE
+      # #####################
+      # - cluster: "in-cluster" # replcae this in-cluster target to EKS cluster to allow the use of cluster metadata
+      #   url: "https://kubernetes.default.svc"
+      #   values:
+      #     deploymentName: "sinks"
+      #     team: "connectors"
+      #     environment: "dev"
+      #     namespace: "nexla"
+      #     targetRevision: "0.1.0-0"
+      #     image: 433433586750.dkr.ecr.us-east-1.amazonaws.com/kafka-connect-jdbc-sink:3.1.0-SNAPSHOT_release-v3.1.0_33_b4af613eca
+      #     minReplicas: "1"
+      #     maxReplicas: "10"
+      #     resources:
+      #       limits:
+      #         memory: 64Gi
+      #         cpu: 12
+      #       requests:
+      #         memory: 62Gi
+      #         cpu: 12
+      #     sinkSize: "xl" # s, m, l, xl
+      #     KAFKA_HEAP_OPTS: -Xmx60g -Xms60g -XX:+HeapDumpOnOutOfMemoryError -XX:+PrintFlagsFinal -XX:HeapDumpPath=/tmp/dump.bin -XX:+UseG1GC -XX:MaxGCPauseMillis=500 -XX:+DisableExplicitGC -XX:+UseStringDeduplication
+  template:
+    metadata:
+      name: '{{ .values.environment }}-{{ .values.team }}-{{ .values.deploymentName }}'
+    spec:
+      project: '{{ .values.environment }}-{{ .values.team }}'
+      source:
+        repoURL: ghcr.io/nexla/gitops-infra-apps
+        targetRevision: "{{ .values.targetRevision }}"
+        chart: "nexla-services"
+        helm:
+          version: v3
+          releaseName: '{{ .values.environment }}-{{ .values.team }}-{{ .values.deploymentName }}-{{ .values.sinkSize }}'
+          values: |
+            global:
+              team: "{{ .values.team }}"
+              sinkSize: "{{ .values.sinkSize }}"
+              environment: "{{ .values.environment }}"
+            
+            common-res:
+              ConfigMap:
+                data:
+                  ENDPOINT_CTRL_ALL_TASKS: "https://ctrl-copy.{{ .values.namespace }}.svc.cluster.local:8080/tasks_to_run/{{ .values.sinkSize }}"
+                  ENDPOINT_CTRL_NUMBER_TASKS: "https://ctrl-copy.{{ .values.namespace }}.svc.cluster.local:8080/number_of_running_tasks_of_size/{{ .values.sinkSize }}/{{ .values.environment }}-{{ .values.team }}-{{ .values.deploymentName }}-{{ .values.sinkSize }}"
+                  ENDPOINT_CTRL_UPDATE_TASK_STATUS: "https://ctrl-copy.{{ .values.namespace }}.svc.cluster.local:8080/update_task_status"
+                  KAFKA_HEAP_OPTS: {{ .values.KAFKA_HEAP_OPTS }}
+              Deployment:
+                items:
+                  _:
+                    podSpec:
+                      spec:
+                        containers:
+                          sink:
+                            image: {{ .values.image }}
+                            resources:
+                              limits:
+                                cpu: "{{ .values.resources.limits.cpu }}"
+                                memory: "{{ .values.resources.limits.memory }}"
+                              requests:
+                                cpu: "{{ .values.resources.requests.cpu }}"
+                                memory: "{{ .values.resources.requests.memory }}"
+              HorizontalPodAutoscaler:
+                items:
+                  _:
+                    spec:
+                      minReplicas: {{ .values.minReplicas }}
+                      maxReplicas: {{ .values.maxReplicas }}
+            prometheus-service-discovery:
+              enabled: true
+              ServiceMonitor:
+                items:
+                  _:
+                    jobLabel: "{{ .values.environment }}-{{ .values.team }}-{{ .values.deploymentName }}-{{ .values.sinkSize }}"
+                    selector:
+                      matchLabels:
+                        app: "{{ .values.environment }}-{{ .values.team }}-{{ .values.deploymentName }}-{{ .values.sinkSize }}"
+          valueFiles:
+            - $root/values/nexla/sinks.yaml
+      destination:
+        server: '{{ .url }}'
+        namespace: '{{ .values.namespace }}'
+      syncPolicy:
+        automated:
+          selfHeal: false
+          prune: false
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+      ignoreDifferences:
+      - group: apps
+        kind: Deployment
+        jqPathExpressions:
+          - '.spec.template.spec.initContainers[]?.env[]?.valueFrom?.resourceFieldRef?.divisor'
+          - '.spec.template.spec.containers[]?.env[]?.valueFrom?.resourceFieldRef?.divisor'
+  syncPolicy:
+    preserveResourcesOnDeletion: false

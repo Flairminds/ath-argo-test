@@ -1,0 +1,100 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: dev-genai-rag
+  namespace: argocd
+spec:
+  goTemplate: true
+  generators:
+  - list:
+      elements:
+      #####################
+      ### GenAI RAG
+      #####################
+      - cluster: "in-cluster" # replcae this in-cluster target to EKS cluster to allow the use of cluster metadata
+        url: "https://kubernetes.default.svc"
+        values:
+          deploymentName: "genai-rag"
+          team: "connectors"
+          environment: "dev"
+          namespace: "nexla"
+          targetRevision: "0.1.0-0"
+          image: 433433586750.dkr.ecr.us-east-1.amazonaws.com/genai-rag:main-194
+          replicas: "1"
+          resources:
+            limits:
+              memory: 16Gi
+              cpu: 4000m
+            requests:
+              memory: 4Gi
+              cpu: 1000m
+      
+  template:
+    metadata:
+      name: '{{ .values.environment }}-{{ .values.team }}-{{ .values.deploymentName }}'
+    spec:
+      project: '{{ .values.environment }}-{{ .values.team }}'
+      source:
+        repoURL: ghcr.io/nexla/gitops-infra-apps
+        targetRevision: "{{ .values.targetRevision }}"
+        chart: "nexla-services"
+        helm:
+          version: v3
+          releaseName: '{{ .values.environment }}-{{ .values.team }}-{{ .values.deploymentName }}'
+          values: |
+            global:
+              team: "{{ .values.team }}"
+              environment: "{{ .values.environment }}"
+            
+            common-res:
+              ConfigMap:
+                data:
+                  TRANSFORMERS_CACHE: "/genai-rag/.cache/huggingface/hub"
+                  HF_HOME: "/genai-rag/.cache/huggingface/hub"
+                  ADMIN_API_URL: "https://dataops.nexla.io/admin-api/"
+              StatefulSet:
+                items:
+                  _:
+                    replicas: {{ .values.replicas }}
+                    podSpec:
+                      spec:
+                        containers:
+                          genai-rag:
+                            image: {{ .values.image }}
+                            resources:
+                              limits:
+                                cpu: "{{ .values.resources.limits.cpu }}"
+                                memory: "{{ .values.resources.limits.memory }}"
+                              requests:
+                                cpu: "{{ .values.resources.requests.cpu }}"
+                                memory: "{{ .values.resources.requests.memory }}"
+            prometheus-service-discovery:
+              enabled: true
+              ServiceMonitor:
+                items:
+                  _:
+                    jobLabel: "{{ .values.environment }}-{{ .values.team }}-{{ .values.deploymentName }}"
+                    selector:
+                      matchLabels:
+                        app: "{{ .values.environment }}-{{ .values.team }}-{{ .values.deploymentName }}"
+          valueFiles:
+            - $root/values/nexla/genai-rag.yaml
+      destination:
+        server: '{{ .url }}'
+        namespace: '{{ .values.namespace }}'
+      syncPolicy:
+        automated:
+          selfHeal: false
+          prune: false
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+      ignoreDifferences:
+      - group: apps
+        kind: Deployment
+        jqPathExpressions:
+          - '.spec.template.spec.initContainers[]?.env[]?.valueFrom?.resourceFieldRef?.divisor'
+          - '.spec.template.spec.containers[]?.env[]?.valueFrom?.resourceFieldRef?.divisor'
+  syncPolicy:
+    preserveResourcesOnDeletion: false

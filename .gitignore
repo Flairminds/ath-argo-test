@@ -1,0 +1,45 @@
+.DS_Store
+templated-output.yaml
+temp
+*.log
+.helmignore
+.dockerignore
+
+# Helm dependencies
+charts/*/charts/
+charts/*/Chart.lock
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.bak
+*~
+
+# Build artifacts
+dist/
+build/
+*.tgz
+
+# Environment files
+.env
+.env.*
+
+# Test files
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# OS generated files
+Thumbs.db
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Desktop.ini

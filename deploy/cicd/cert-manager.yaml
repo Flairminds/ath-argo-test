@@ -1,0 +1,101 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: certmanager
+  namespace: argocd
+spec:
+  goTemplate: true
+  generators:
+    - list:
+        elements:
+          - cluster: "in-cluster"
+            url: "https://kubernetes.default.svc"
+            values:
+              team: "infra"
+              deploymentName: "cert-manager"
+              namespace: "cert-manager"
+              targetRevision: "v1.12.3"
+              replicaCount: 2
+              resources:
+                requests:
+                  cpu: "100m"
+                  memory: "256Mi"
+                limits:
+                  cpu: "200m"
+                  memory: "512Mi"
+              installCRDs: true
+              tolerations:
+                - key: CriticalAddonsOnly
+                  operator: Equal
+                  value: "true"
+                  effect: NoSchedule
+  template:
+    metadata:
+      name: '{{ .values.team }}-{{ .values.deploymentName }}'
+    spec:
+      project: '{{ .values.team }}'
+      source:
+        repoURL: "https://charts.jetstack.io"
+        targetRevision: "{{ .values.targetRevision }}"
+        chart: "cert-manager"
+        helm:
+          releaseName: "{{ .values.deploymentName }}"
+          values: |
+            {{- define "tolerations" }}
+            {{- range . }}
+              - key: "{{ .key }}"
+                operator: "{{ .operator }}"
+                value: "{{ .value }}"
+                effect: "{{ .effect }}"
+            {{- end }}
+            {{- end }}
+            replicaCount: {{ .values.replicaCount }}
+            resources:
+              requests:
+                cpu: "{{ .values.resources.requests.cpu }}"
+                memory: "{{ .values.resources.requests.memory }}"
+              limits:
+                cpu: "{{ .values.resources.limits.cpu }}"
+                memory: "{{ .values.resources.limits.memory }}"
+            enableCertificateOwnerRef: true
+            crds:
+              enabled: {{ .values.installCRDs | default "false" }}
+              keep: true
+            tolerations:
+              {{ template "tolerations" .values.tolerations }}
+            podDisruptionBudget:
+              enabled: true
+            webhook:
+              replicaCount: {{ .values.replicaCount }}
+              podDisruptionBudget:
+                enabled: true
+              tolerations:
+                {{ template "tolerations" .values.tolerations }}
+            cainjector:
+              replicaCount: {{ .values.replicaCount }}
+              podDisruptionBudget:
+                enabled: true
+              tolerations:
+              {{ template "tolerations" .values.tolerations }}
+            startupapicheck:
+              tolerations:
+                {{ template "tolerations" .values.tolerations }}
+            prometheus:
+              serviceMonitor:
+                enabled: true
+                additionalLabels:
+                  team: devops            
+      destination:
+        server: '{{ .url }}'
+        namespace: '{{ .values.namespace }}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+      ignoreDifferences: []
+  syncPolicy:
+    preserveResourcesOnDeletion: false

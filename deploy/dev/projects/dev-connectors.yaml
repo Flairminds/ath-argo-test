@@ -1,0 +1,20 @@
+---
+# This project is for all shared applications launched as per the applicationsets configurations
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: dev-connectors
+spec:
+  description: Argo CD project for deploying connectors team applications on DEV environment
+  sourceRepos:
+  - '*'
+  destinations:
+  - name: "*"
+    server: "*"
+    namespace: 'nexla'
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  namespaceResourceWhitelist:
+  - group: '*'
+    kind: '*'

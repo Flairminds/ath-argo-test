@@ -1,0 +1,66 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: github-arc
+  namespace: argocd
+spec:
+  goTemplate: true
+  generators:
+    - list:
+        elements:
+          - cluster: "in-cluster" # Replace with your EKS cluster identifier if deploying to a different cluster
+            url: "https://kubernetes.default.svc"
+            values:
+              deploymentName: "github-arc"
+              team: "cicd"
+              namespace: "github-runners"
+              targetRevision: "0.10.1"
+              resources:
+                limits:
+                  cpu: "500m"
+                  memory: "512Mi"
+                requests:
+                  cpu: "250m"
+                  memory: "256Mi"
+  template:
+    metadata:
+      name: '{{ .values.team }}-{{ .values.deploymentName }}'
+    spec:
+      project: '{{ .values.team }}'
+      source:
+        repoURL: "ghcr.io/actions/actions-runner-controller-charts"
+        targetRevision: "{{ .values.targetRevision }}"
+        chart: "gha-runner-scale-set-controller"
+        helm:
+          releaseName: "{{ .values.deploymentName }}"
+          values: |
+            resources:
+              limits:
+                cpu: "{{ .values.resources.limits.cpu }}"
+                memory: "{{ .values.resources.limits.memory }}"
+              requests:
+                cpu: "{{ .values.resources.requests.cpu }}"
+                memory: "{{ .values.resources.requests.memory }}"
+            tolerations:
+              - effect: NoSchedule
+                key: jenkins
+                operator: Equal
+                value: "true"
+              - effect: NoExecute
+                key: jenkins
+                operator: Equal
+                value: "true"
+      destination:
+        server: '{{ .url }}'
+        namespace: '{{ .values.namespace }}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+      ignoreDifferences: []
+  syncPolicy:
+    preserveResourcesOnDeletion: false

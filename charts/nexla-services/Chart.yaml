@@ -1,0 +1,46 @@
+apiVersion: v2
+name: nexla-services
+description: A Helm chart for Nexla services
+
+type: application
+
+version: "0.1.0-0"          # The version of the chart
+appVersion: "0.1.0"       # The version of the application enclosed by the chart
+
+home: "https://github.com/nexla/gitops-infra-apps/charts/nexla-services"
+
+sources:
+  - "https://github.com/nexla/gitops-infra-apps/charts/nexla-services"
+
+keywords:
+  - nexla
+  - services
+
+maintainers:
+  - name: DevOps Team
+    email: devops@nexla.com
+
+annotations:
+  category: Application
+  access: Private
+  nexla.com/license: "Proprietary"
+  nexla.com/support: "support@nexla.com"
+  nexla.com/owner: "Nexla"
+  nexla.com/team: "DevOps"
+
+dependencies:
+  # TODO: Copy dep chart locally or use something better. [ TBD ]
+  - name: "common-res"
+    version: "1.0.19"
+    repository: "oci://ghcr.io/luminartech/helm-charts-public"
+    condition: "common-res.enabled"
+
+  - name: prometheus-service-discovery
+    version: "40.1.0-5"
+    repository: "oci://ghcr.io/luminartech/helm-charts-public"
+    condition: prometheus-service-discovery.enabled
+
+  # - name: "nexla-commons"
+  #   version: "0.1.0"
+  #   repository: "oci://ghcr.io/nexla/helm-charts"
+  #   condition: "nexla-commons.enabled"
