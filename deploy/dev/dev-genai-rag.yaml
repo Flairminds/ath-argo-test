@@ -20,15 +20,15 @@ spec:
           environment: "dev"
           namespace: "nexla"
           targetRevision: "0.1.0-0"
-          image: 433433586750.dkr.ecr.us-east-1.amazonaws.com/genai-rag:main-194
+          image: nginx
           replicas: "1"
           resources:
             limits:
-              memory: 16Gi
-              cpu: 4000m
+              memory: 1Gi
+              cpu: 100m
             requests:
-              memory: 4Gi
-              cpu: 1000m
+              memory: 1Gi
+              cpu: 100m
       
   template:
     metadata:
