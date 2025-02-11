@@ -18,7 +18,7 @@ spec:
           deploymentName: "sinks"
           team: "connectors"
           environment: "dev"
-          namespace: "nexla"
+          namespace: "default"
           targetRevision: "0.1.0-0"
           image: nginx
           minReplicas: "1"

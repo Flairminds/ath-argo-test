@@ -18,7 +18,7 @@ spec:
           deploymentName: "genai-rag"
           team: "connectors"
           environment: "dev"
-          namespace: "nexla"
+          namespace: "default"
           targetRevision: "0.1.0-0"
           image: nginx
           replicas: "1"
