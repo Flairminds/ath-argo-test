@@ -109,7 +109,7 @@ spec:
       source:
         repoURL: athargotest.azurecr.io/helm/fm-services
         targetRevision: "{{ .values.targetRevision }}"
-        chart: "nexla-services"
+        chart: "fm-services"
         helm:
           version: v3
           releaseName: '{{ .values.environment }}-{{ .values.team }}-{{ .values.deploymentName }}-{{ .values.sinkSize }}'
