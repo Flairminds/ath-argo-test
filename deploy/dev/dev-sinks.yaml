@@ -107,7 +107,7 @@ spec:
     spec:
       project: '{{ .values.environment }}-{{ .values.team }}'
       source:
-        repoURL:  ghcr.io/flairminds/ath-argo-test
+      - repoURL:  athargotest.azurecr.io/helm
         targetRevision: "{{ .values.targetRevision }}"
         chart: "fm-services"
         helm:
@@ -158,6 +158,9 @@ spec:
                         app: "{{ .values.environment }}-{{ .values.team }}-{{ .values.deploymentName }}-{{ .values.sinkSize }}"
           valueFiles:
             - $root/values/testfm/sinks.yaml
+      - repoURL: https://github.com/Flairminds/ath-argo-test.git
+        ref: root
+        targetRevision: HEAD
       destination:
         server: '{{ .url }}'
         namespace: '{{ .values.namespace }}'
