@@ -12,7 +12,7 @@ spec:
     directory:
       recurse: true
     path: deploy/common
-    repoURL: git@github.com:nexla/gitops-infra-apps.git
+    repoURL: git@https://github.com/Flairminds/ath-argo-test.git
     targetRevision: HEAD
   syncPolicy:
     automated:

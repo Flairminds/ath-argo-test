@@ -1,4 +1,4 @@
 # gitops-infra-apps
 
-Deploy Nexla Apps on the Infrastructure via GitOps
+Deploy testfm Apps on the Infrastructure via GitOps
 

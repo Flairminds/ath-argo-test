@@ -52,7 +52,7 @@ spec:
                 data:
                   TRANSFORMERS_CACHE: "/genai-rag/.cache/huggingface/hub"
                   HF_HOME: "/genai-rag/.cache/huggingface/hub"
-                  ADMIN_API_URL: "https://dataops.nexla.io/admin-api/"
+                  ADMIN_API_URL: "https://dataops.testfm.io/admin-api/"
               StatefulSet:
                 items:
                   _:
@@ -79,7 +79,7 @@ spec:
                       matchLabels:
                         app: "{{ .values.environment }}-{{ .values.team }}-{{ .values.deploymentName }}"
           valueFiles:
-            - $root/values/nexla/genai-rag.yaml
+            - $root/values/testfm/genai-rag.yaml
       destination:
         server: '{{ .url }}'
         namespace: '{{ .values.namespace }}'

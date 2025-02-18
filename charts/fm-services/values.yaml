@@ -87,7 +87,7 @@ common-res:
   #           ##
   #           # serviceAccountName: '{{ include "common-gitops.names.release" . }}'
   #           ## TODO: Let each application have its own service account
-  #           serviceAccountName: 'svc-nexla'
+  #           serviceAccountName: 'svc-testfm'
 
   #           ## @param common-res.Deployment.items._.podSpec.spec.restartPolicy Restart policy for the pod
   #           restartPolicy: Always
@@ -107,11 +107,11 @@ common-res:
   #           ## @skip common-res.Deployment.items._.podSpec.spec.tolerations
   #           ##
   #           tolerations:
-  #             - key: "sinks-nexla-apps"
+  #             - key: "sinks-testfm-apps"
   #               operator: "Equal"
   #               value: "true"
   #               effect: "NoSchedule"
-  #             - key: "sinks-nexla-apps"
+  #             - key: "sinks-testfm-apps"
   #               operator: "Equal"
   #               value: "true"
   #               effect: "NoExecute"
@@ -139,7 +139,7 @@ common-res:
   #           ## @skip common-res.Deployment.items._.podSpec.spec.nodeSelector
   #           ##
   #           nodeSelector:
-  #             eks.amazonaws.com/nodegroup: Sinks-Nexla-Apps
+  #             eks.amazonaws.com/nodegroup: Sinks-testfm-Apps
 
   #           ## Containers configuration
   #           containers:
@@ -147,7 +147,7 @@ common-res:
   #               ## @param common-res.Deployment.items._.podSpec.spec.containers.sink.image
   #               ##
   #               ## @section Default configurations
-  #               image: "docker.io/nexla/kafka-connect-total-sink:3.2.0-SNAPSHOT_unify-src-sink-imgs_3_92a835ec13"
+  #               image: "docker.io/testfm/kafka-connect-total-sink:3.2.0-SNAPSHOT_unify-src-sink-imgs_3_92a835ec13"
 
   #               ## @param common-res.Deployment.items._.podSpec.spec.containers.sink.imagePullPolicy Container image pullPolicy. Allowed values: `IfNotPresent`, `Always`, `Never`
   #               ##
@@ -365,12 +365,12 @@ common-res:
   #                 - name: CONNECT_CONSUMER_SSL_KEY_PASSWORD
   #                   valueFrom:
   #                     secretKeyRef:
-  #                       name: 'nexlakafka'
+  #                       name: 'testfmkafka'
   #                       key: 'user.password'
   #                 - name: CONNECT_CONSUMER_SSL_KEYSTORE_PASSWORD
   #                   valueFrom:
   #                     secretKeyRef:
-  #                       name: 'nexlakafka'
+  #                       name: 'testfmkafka'
   #                       key: 'user.password'
   #                 - name: CONNECT_CONSUMER_SSL_TRUSTSTORE_PASSWORD
   #                   valueFrom:
@@ -380,12 +380,12 @@ common-res:
   #                 - name: CONNECT_PRODUCER_SSL_KEY_PASSWORD
   #                   valueFrom:
   #                     secretKeyRef:
-  #                       name: 'nexlakafka'
+  #                       name: 'testfmkafka'
   #                       key: 'user.password'
   #                 - name: CONNECT_PRODUCER_SSL_KEYSTORE_PASSWORD
   #                   valueFrom:
   #                     secretKeyRef:
-  #                       name: 'nexlakafka'
+  #                       name: 'testfmkafka'
   #                       key: 'user.password'
   #                 - name: CONNECT_PRODUCER_SSL_TRUSTSTORE_PASSWORD
   #                   valueFrom:
@@ -395,7 +395,7 @@ common-res:
   #                 - name: CONNECT_SSL_KEYSTORE_PASSWORD
   #                   valueFrom:
   #                     secretKeyRef:
-  #                       name: 'nexlakafka'
+  #                       name: 'testfmkafka'
   #                       key: 'user.password'
   #                 - name: CONNECT_SSL_TRUSTSTORE_PASSWORD
   #                   valueFrom:
@@ -421,7 +421,7 @@ common-res:
   #                 - secretRef:
   #                     name: '{{ include "common-gitops.names.release" . }}'
   #                 - configMapRef:
-  #                     name: 'nexla-backend'
+  #                     name: 'testfm-backend'
 
   #               ## Default Volume mounts
   #               ## @skip common-res.Deployment.items._.podSpec.spec.containers.sink.volumeMounts
@@ -493,7 +493,7 @@ common-res:
   #                 optional: false
   #             - name: "keystore-secret-volume"
   #               secret:
-  #                 secretName: "nexlakafka"
+  #                 secretName: "testfmkafka"
   #                 defaultMode: 420
   #                 optional: false
   #             - name: "server-cert-secret-volume"
