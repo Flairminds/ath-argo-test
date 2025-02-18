@@ -19,7 +19,7 @@ spec:
           team: "connectors"
           environment: "dev"
           namespace: "default"
-          targetRevision: "0.1.0-0"
+          targetRevision: "0.1.0"
           image: nginx
           replicas: "1"
           resources:
@@ -35,8 +35,8 @@ spec:
       name: '{{ .values.environment }}-{{ .values.team }}-{{ .values.deploymentName }}'
     spec:
       project: '{{ .values.environment }}-{{ .values.team }}'
-      source:
-        repoURL: athargotest.azurecr.io/helm
+      sources:
+      - repoURL: athargotest.azurecr.io/helm
         targetRevision: "{{ .values.targetRevision }}"
         chart: "fm-services"
         helm:
@@ -80,6 +80,9 @@ spec:
                         app: "{{ .values.environment }}-{{ .values.team }}-{{ .values.deploymentName }}"
           valueFiles:
             - $root/values/testfm/genai-rag.yaml
+      - repoURL: https://github.com/Flairminds/ath-argo-test.git
+        ref: root
+        targetRevision: HEAD
       destination:
         server: '{{ .url }}'
         namespace: '{{ .values.namespace }}'
