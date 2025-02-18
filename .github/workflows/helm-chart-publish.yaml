@@ -2,7 +2,7 @@ name: Release Helm Chart
 on:
   push:
     branches:
-      - main
+      - master
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: $\{\{ github.repository }}
