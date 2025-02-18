@@ -106,7 +106,7 @@ spec:
       name: '{{ .values.environment }}-{{ .values.team }}-{{ .values.deploymentName }}'
     spec:
       project: '{{ .values.environment }}-{{ .values.team }}'
-      source:
+      sources:
       - repoURL:  athargotest.azurecr.io/helm
         targetRevision: "{{ .values.targetRevision }}"
         chart: "fm-services"
