@@ -44,7 +44,7 @@ jobs:
         run: |
           helm dependency update ./charts/fm-services
           helm package ./charts/fm-services --version ${{ steps.set-variables.outputs.VERSION }}
-          helm push ./fm-services-chart-${{ steps.set-variables.outputs.VERSION }}.tgz oci://${{ steps.set-variables.outputs.REPOSITORY }}/charts          
+          helm push ./fm-services-${{ steps.set-variables.outputs.VERSION }}.tgz oci://${{ steps.set-variables.outputs.REPOSITORY }}/charts          
   
   publish-helm-chart:
     permissions:
