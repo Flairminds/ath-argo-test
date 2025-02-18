@@ -1,0 +1,39 @@
+apiVersion: v1
+entries:
+  fm-services:
+  - annotations:
+      access: Private
+      category: Application
+      fm.com/license: Proprietary
+      fm.com/owner: fm
+      fm.com/support: support@fm.com
+      fm.com/team: DevOps
+    apiVersion: v2
+    appVersion: 0.1.0
+    created: "2025-02-18T15:35:58.556505+05:30"
+    dependencies:
+    - condition: common-res.enabled
+      name: common-res
+      repository: oci://ghcr.io/luminartech/helm-charts-public
+      version: 1.0.19
+    - condition: prometheus-service-discovery.enabled
+      name: prometheus-service-discovery
+      repository: oci://ghcr.io/luminartech/helm-charts-public
+      version: 40.1.0-5
+    description: A Helm chart for fm services
+    digest: 3f8ccbe2007118ebe8e41e35a38e361e905224b72f56ae79b48c5a4c9e4b9a36
+    home: https://github.com/Flairminds/ath-argo-test/charts/fm-services
+    keywords:
+    - fm
+    - services
+    maintainers:
+    - email: devops@fm.com
+      name: DevOps Team
+    name: fm-services
+    sources:
+    - https://github.com/Flairminds/ath-argo-test/charts/fm-services
+    type: application
+    urls:
+    - https://flairminds.github.io/ath-argo-test/charts/fm-services-0.1.0-0.tgz
+    version: 0.1.0-0
+generated: "2025-02-18T15:35:58.5498315+05:30"
