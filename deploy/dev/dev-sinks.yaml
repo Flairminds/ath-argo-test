@@ -19,7 +19,7 @@ spec:
           team: "connectors"
           environment: "dev"
           namespace: "default"
-          targetRevision: "0.1.0-0"
+          targetRevision: "0.1.0"
           image: nginx
           minReplicas: "1"
           maxReplicas: "2"
