@@ -18,6 +18,7 @@ jobs:
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
       - name: configure dependency
         run: |
+          cd charts/fm-services
           helm dependency update
       - name: Run chart-releaser job
         uses: helm/chart-releaser-action@v1.4.0
