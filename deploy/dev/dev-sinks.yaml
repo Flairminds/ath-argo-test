@@ -107,7 +107,8 @@ spec:
     spec:
       project: '{{ .values.environment }}-{{ .values.team }}'
       source:
-        repoURL: athargotest.azurecr.io/helm
+        repoURL: https://github.com/Flairminds/ath-argo-test.git
+        path: "charts"
         targetRevision: "{{ .values.targetRevision }}"
         chart: "fm-services"
         helm:
