@@ -9,8 +9,8 @@ entries:
       fm.com/support: support@fm.com
       fm.com/team: DevOps
     apiVersion: v2
-    appVersion: 0.1.1
-    created: "2025-02-18T09:16:16.963444871Z"
+    appVersion: 0.1.2
+    created: "2025-02-18T09:18:22.23675856Z"
     dependencies:
     - condition: common-res.enabled
       name: common-res
@@ -21,7 +21,7 @@ entries:
       repository: oci://ghcr.io/luminartech/helm-charts-public
       version: 40.1.0-5
     description: A Helm chart for fm services
-    digest: 691290854212ef8a22c48a918062c0570542670e31dbb51af341f6757e33f6f3
+    digest: 7cc0025f616acf6ed3acf7ad6dc7be126fc35f5da345cd2c0a461205f693d770
     home: https://github.com/Flairminds/ath-argo-test/charts/fm-services
     keywords:
     - fm
@@ -36,4 +36,4 @@ entries:
     urls:
     - https://Flairminds.github.io/ath-argo-test/fm-services-0.1.0-0.tgz
     version: 0.1.0-0
-generated: "2025-02-18T09:16:16.960689621Z"
+generated: "2025-02-18T09:18:22.234388774Z"
